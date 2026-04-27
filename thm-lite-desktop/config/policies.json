@@ -1,0 +1,24 @@
+{
+  "policies": {
+    "WebsiteFilter": {
+      "Block": [
+        "*"
+      ],
+      "Exceptions": [
+        "*://google.com/*",
+        "*://*.google.com/*",
+        "*://*.gstatic.com/*",
+        "*://*.googleapis.com/*",
+        "*://*.googleusercontent.com/*"
+      ]
+    },
+    "Preferences": {
+      "browser.contentblocking.category": {
+        "Value": "strict",
+        "Status": "locked"
+      }
+    },
+    "DisableAppUpdate": true,
+    "DisableFeedbackCommands": true
+  }
+}

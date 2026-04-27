@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  ctf-sqli-lab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ctf-sqli-lab
+    ports:
+      - "8080:80"      # Web Application
+      - "2222:22"      # SSH Access
+      - "33060:3306"   # MySQL (optional, for advanced challenges)
+    environment:
+      - MYSQL_ROOT_PASSWORD=r00tP@ssw0rd!
+      - CTF_MODE=enabled
+      - DIFFICULTY=progressive
+    volumes:
+      - ctf-data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - ctf-network
+    cap_add:
+      - NET_ADMIN
+
+networks:
+  ctf-network:
+    driver: bridge
+
+volumes:
+  ctf-data:
+    driver: local

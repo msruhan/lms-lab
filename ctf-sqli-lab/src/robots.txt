@@ -1,0 +1,13 @@
+# robots.txt - CTF Company Portal
+# Last updated: 2024-01-15
+
+User-agent: *
+Disallow: /config/
+Disallow: /backup/
+Disallow: /admin-panel/
+Disallow: /phpinfo.php
+Disallow: /challenges/
+Disallow: /db-backup/
+
+# Note: Remember to remove phpinfo.php before production
+# DB credentials: see /config/database.php

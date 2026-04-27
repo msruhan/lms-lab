@@ -1,0 +1,86 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: es-siem
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: kibana-siem
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  guacd:
+    image: guacamole/guacd:latest
+    container_name: guacd-siem
+    ports:
+      - "4822:4822"
+    volumes:
+      - guacd_drive:/drive
+      - guacd_record:/record
+    restart: unless-stopped
+
+  guacamole-db:
+    image: mysql:8.0
+    container_name: guacamole-db-siem
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=guacamole_db
+      - MYSQL_USER=guacamole_user
+      - MYSQL_PASSWORD=guacamole_password
+    volumes:
+      - guacamole_db:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootpassword",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  guacamole:
+    image: guacamole/guacamole:latest
+    container_name: guacamole-siem
+    ports:
+      - "8080:8080"
+    environment:
+      - GUACD_HOSTNAME=guacd
+      - GUACD_PORT=4822
+      - MYSQL_HOSTNAME=guacamole-db
+      - MYSQL_DATABASE=guacamole_db
+      - MYSQL_USERNAME=guacamole_user
+      - MYSQL_PASSWORD=guacamole_password
+    depends_on:
+      guacd:
+        condition: service_started
+      guacamole-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  es_data:
+  guacd_drive:
+  guacd_record:
+  guacamole_db:
